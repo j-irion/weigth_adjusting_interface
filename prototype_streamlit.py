@@ -9,19 +9,63 @@ def main():
   if 'submitted' not in st.session_state:
     st.session_state.submitted = False
 
-  metric_names = ["Metric 1", "Metric 2", "Metric 3", "Metric 4"]
+  # Keep track of each column's selected metric in session_state
+  for i in range(4):
+    if f"metric_select_{i}" not in st.session_state:
+      st.session_state[f"metric_select_{i}"] = "None"
+
+  metrics = [
+    {"name": "Metric 1", "direction": "higher"},
+    {"name": "Metric 2", "direction": "higher"},
+    {"name": "Metric 3", "direction": "lower"},
+    {"name": "Metric 4", "direction": "lower"},
+    {"name": "Metric 5", "direction": "higher"},
+    {"name": "Metric 6", "direction": "lower"},
+    {"name": "Metric 7", "direction": "higher"},
+    {"name": "Metric 8", "direction": "lower"}
+  ]
+
+  metric_names = [m["name"] for m in metrics]
 
   # Create sliders
   cols = st.columns(4)
   for i in range(4):
     with cols[i]:
-      st.subheader(f"{metric_names[i]}")
+      # Build the list of used metrics (except current selection)
+      used_metrics = [
+        st.session_state[f"metric_select_{j}"]
+        for j in range(4) if j != i
+      ]
+
+      # Build possible options for this selectbox
+      current_selection = st.session_state[f"metric_select_{i}"]
+      options_for_this_col = ["None"] + [
+        m for m in metric_names
+        if (m not in used_metrics) or (m == current_selection)
+      ]
+
+      # Metric selection dropdown
+      selected_metric = st.selectbox(
+        "Select Metric",
+        options=options_for_this_col,
+        index=options_for_this_col.index(current_selection),
+        key=f"metric_select_{i}"
+      )
+
+      # If a valid metric is selected, find and display its direction
+      if selected_metric != "None":
+        direction = next(m["direction"]
+                         for m in metrics if m["name"] == selected_metric)
+        st.caption(f"{direction.capitalize()} is better")
+      else:
+        st.caption("No metric selected")
+
       st.session_state.weights[i] = st.slider(
         f"Weight",
         min_value=0.0,
         max_value=1.0,
         value=st.session_state.weights[i],
-        step=0.01,
+        step=0.05,
         key=f"weight_{i}"
       )
   # Calculate total weight
