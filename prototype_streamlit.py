@@ -47,6 +47,7 @@ def main():
       # Metric selection dropdown
       selected_metric = st.selectbox(
         "Select Metric",
+        label_visibility="collapsed",
         options=options_for_this_col,
         index=options_for_this_col.index(current_selection),
         key=f"metric_select_{i}"
